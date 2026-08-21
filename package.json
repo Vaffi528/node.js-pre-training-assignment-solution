@@ -13,15 +13,21 @@
     "test:db-nosql": "jest tests/db-nosql.test.js",
     "test:js-ts-all": "jest --testPathPatterns=js-ts-task",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "lint": "eslint"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/jest": "^30.0.0",
+    "eslint": "^10.9.0",
+    "globals": "^17.11.0",
     "jest": "^30.0.4",
-    "ts-jest": "^29.1.0"
+    "jiti": "^2.7.0",
+    "ts-jest": "^29.1.0",
+    "typescript-eslint": "^8.67.0"
   },
   "dependencies": {
     "express": "^5.1.0"
