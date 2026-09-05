@@ -1,24 +1,42 @@
+import { mapArray, filterArray } from './array-helpers'
+
 export class InMemoryRepository<T extends { id: number }> {
   // private storage
   private items: T[] = [];
 
   add(entity: T): T {
-    throw new Error('add: not implemented');
+    this.items.push(entity);
+    return entity;
   }
 
   update(id: number, patch: Partial<T>): T {
-    throw new Error('update: not implemented');
+    this.items = mapArray(this.items, (item) => item.id === id ? {...item, ...patch, id} : item);
+    
+    const element = this.findById(id);
+    if (!element) {
+      throw new Error("Error in update: no such ID");
+    } else {
+      return element;
+    }
+    
   }
 
   remove(id: number): void {
-    throw new Error('remove: not implemented');
+    if (!this.findById(id)) {
+      throw new Error("Error in remove: no such ID");
+    }
+
+    this.items = filterArray(this.items, (item) => item.id !== id);
   }
 
   findById(id: number): T | undefined {
-    throw new Error('findById: not implemented');
+    const validElements = filterArray(this.items, (item) => item.id === id);
+    if (validElements.length === 1) {
+      return validElements[0];
+    }
   }
 
   findAll(): T[] {
-    throw new Error('findAll: not implemented');
+    return [...this.items];
   }
 }
