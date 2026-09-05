@@ -18,6 +18,13 @@ describe('Task 06: Simulated API', () => {
     expect(updated.status).toBe(TodoStatus.COMPLETED);
   });
 
+  it('update all should change status', async () => {
+    const [item] = await api.getAll();
+    const updated = await api.update(item.id, { status: TodoStatus.COMPLETED, description: 'hihi33' });
+    expect(updated.status).toBe(TodoStatus.COMPLETED);
+    expect(updated.description).toBe('hihi33');
+  });
+
   it('remove should delete item', async () => {
     const [item] = await api.getAll();
     await api.remove(item.id);
