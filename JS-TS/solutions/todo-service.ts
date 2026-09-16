@@ -25,14 +25,7 @@ export class TodoService {
 
     const currentStatus = todos[0].status;
 
-    let newStatus: TodoStatus;
-    if (currentStatus === TodoStatus.PENDING) {
-      newStatus = TodoStatus.IN_PROGRESS;
-    } else if (currentStatus === TodoStatus.IN_PROGRESS) {
-      newStatus = TodoStatus.COMPLETED;
-    } else {
-      newStatus = TodoStatus.PENDING;
-    }
+    const newStatus = currentStatus === TodoStatus.COMPLETED ? TodoStatus.PENDING : TodoStatus.COMPLETED;
 
     return await this.api.update(id, {status: newStatus})
   }

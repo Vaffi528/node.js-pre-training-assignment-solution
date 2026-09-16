@@ -16,11 +16,11 @@ describe('TodoService tests', () => {
 
   it('toggling status', async () => {
     let todo = await service.toggleStatus(1);
-    expect(todo.status).toBe(TodoStatus.IN_PROGRESS);
-    todo = await service.toggleStatus(1);
     expect(todo.status).toBe(TodoStatus.COMPLETED);
     todo = await service.toggleStatus(1);
     expect(todo.status).toBe(TodoStatus.PENDING);
+    todo = await service.toggleStatus(1);
+    expect(todo.status).toBe(TodoStatus.COMPLETED);
   });
 
   it('search returns matching items', async () => {
