@@ -1,0 +1,22 @@
+Brief description of implementation:
+1. sendMessage - forming message, updating message id, adding message to array with size checking, emitting events and returning the message;
+2. subscribeToMessages - using `on` methon inherited form `EventEmitter` for subscribing on message type;
+3. subscribeToType - using `on` methon inherited form `EventEmitter` for subscribing on passed type;
+4. getUserCount - returning size of users set;
+5. getMessageHistory - returning slice of messages array with passed size (from end);
+6. addUser - addind user to users set and emitting event with user-joined type;
+7. removeUser - removing user from users set and emitting event with user-left type if user deleted successfully (otherwise, if provided username isn't in set, it makes nothing);
+8. getActiveUsers - returning array of users;
+9. clearHistory - resetting messages array;
+10. getStats - returning object contains size of messages array, size of users set and nested object with amount of messages of specific tyoes;
+
+How to run:
+1. Ensure Node.js is installed;
+2. Open terminal in the project root directory;
+3. Install dependencies if required;
+4. Run the solution script using the following command:
+   node path/to/your/file.js
+example: node task-01-test.js
+
+
+
