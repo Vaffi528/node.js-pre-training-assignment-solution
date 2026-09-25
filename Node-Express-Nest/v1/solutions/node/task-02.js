@@ -6,9 +6,9 @@ class CSVParser extends Transform {
   constructor(options = {}) {
     super({ objectMode: true });
     // TODO: Initialize properties
-    // - this.headers = null;
-    // - this.lineNumber = 0;
-    // - this.buffer = '';
+    this.headers = null;
+    this.lineNumber = 0;
+    this.buffer = '';
   }
 
   _transform(chunk, encoding, callback) {
@@ -20,13 +20,52 @@ class CSVParser extends Transform {
     //    - First line: extract headers
     //    - Other lines: create objects with headers as keys
     // 5. Push objects to next stream
+    this.buffer += chunk.toString();
+    
+    const splitBuffer = this.buffer.split(/\r?\n/);
+    this.buffer = splitBuffer.pop();
+
+    splitBuffer.forEach((element, index) => {
+      const line = element.split(',');
+      if (this.lineNumber === 0) {
+        this.headers = line;
+        this.lineNumber++;
+      } else {
+        this.processLine(line);
+      }
+    });
 
     callback();
   }
 
   _flush(callback) {
     // TODO: Process any remaining data in buffer
+    const remainingLine = this.buffer.split(',');
+    if (this.headers !== null && remainingLine.length === this.headers.length) {
+      this.processLine(remainingLine);
+    }
+
+    this.headers = null;
+    this.lineNumber = 0;
+    this.buffer = '';
+    
     callback();
+  }
+
+  /**
+    * Line parsing into object with saving
+    * @param {Array} line 
+    */
+  processLine(line) {
+    if (this.headers === null) {
+      return;
+    }
+
+    let objLine = {};
+    for (let i = 0; i < line.length; i++) {
+      objLine[this.headers[i]] = line[i];
+    }
+    this.push(objLine);
   }
 }
 
@@ -60,7 +99,7 @@ class CSVWriter extends Transform {
   constructor(options = {}) {
     super({ objectMode: true });
     // TODO: Initialize properties
-    // - this.headerWritten = false;
+    this.headerWritten = false;
   }
 
   _transform(record, encoding, callback) {
@@ -69,7 +108,11 @@ class CSVWriter extends Transform {
     // 2. Convert record values to CSV line
     // 3. Handle special characters and quotes
     // 4. Push CSV line as string
-
+    if (!this.headerWritten) {
+      this.push(Object.keys(record).join(',') + '\n');
+      this.headerWritten = true;
+    }
+    this.push(Object.values(record).join(',') + '\n');
     callback();
   }
 }
@@ -92,8 +135,23 @@ function capitalizeName(name) {
   // Examples:
   // "john doe" → "John Doe"
   // "mary-jane smith" → "Mary-Jane Smith"
+  let nameModified = "";
+  let isCapital = true;
+  [... name].forEach((char) => {
+    if (isCapital) {
+      nameModified += char.toUpperCase();
+      isCapital = false;
+    } else {
+      nameModified += char.toLowerCase();
+    }
 
-  return name;
+    if (char === " " || char === "-") {
+      isCapital = true;
+    }
+
+  });
+
+  return nameModified;
 }
 
 /**
@@ -106,8 +164,11 @@ function normalizeEmail(email) {
   // 1. Convert to lowercase
   // 2. Validate basic email format (contains @ and .)
   // 3. Return normalized email or original if invalid
+  if (!email.includes('@') || !email.includes('.')) {
+    return email;
+  }
 
-  return email;
+  return email.toLowerCase();
 }
 
 /**
@@ -121,8 +182,16 @@ function formatPhone(phone) {
   // 2. Check if exactly 10 digits
   // 3. Format as (XXX) XXX-XXXX
   // 4. Return "INVALID" if not valid
+  const dp = [...phone].filter((char) => {
+    return /\d/.test(char) ? true : false;
+  });
 
-  return phone;
+  if (dp.length !== 10) {
+    return "INVALID";
+  }
+
+  return `(${dp[0]}${dp[1]}${dp[2]}) ${dp[3]}${dp[4]}${dp[5]}-${dp[6]}${dp[7]}${dp[8]}${dp[9]}`;
+
 }
 
 /**
@@ -139,7 +208,6 @@ function standardizeDate(date) {
   // 2. Convert to YYYY-MM-DD format
   // 3. Validate date is real
   // 4. Return original if invalid
-
   return date;
 }
 
