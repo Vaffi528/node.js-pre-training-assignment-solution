@@ -1,0 +1,22 @@
+Brief description of implementation:
+1. CSVParser - get string data divided by chunks and form an object from this data;
+2. DataTransformer - formats object that contians raw data to valid form;
+3. CSVWriter - transform object data back to CSV format, as string;
+4. capitalizeName - formats the name provided as an argument following the provided rules of formattig;
+5. normalizeEmail - formats the email provided as an argument following the provided rules of formattig;
+6. formatPhone - formats the phone number provided as an argument following the provided rules of formattig;
+7. standardizeDate - formats the date provided as an argument following the provided rules of formattig;
+8. processCSVFile - creates the pipeline that read, handle and write data using previous methods and classes and handle errors;
+9. createSampleData - creates the sample of data if not exist
+
+How to run:
+1. Ensure Node.js is installed;
+2. Open terminal in the project root directory;
+3. Install dependencies if required;
+4. Run the solution script using the following command:
+   node path/to/your/file.js
+example: node task-02.js
+example: node task-02-test.js
+
+
+

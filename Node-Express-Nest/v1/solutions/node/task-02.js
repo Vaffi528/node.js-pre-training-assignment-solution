@@ -1,6 +1,7 @@
 const fs = require("fs");
 const { Transform } = require("stream");
 const { pipeline } = require("stream/promises");
+const path = require("path");
 
 class CSVParser extends Transform {
   constructor(options = {}) {
@@ -86,7 +87,13 @@ class DataTransformer extends Transform {
     // 4. Standardize date using standardizeDate()
     // 5. Capitalize city name
     // 6. Push transformed record
-
+    this.push({
+      name: capitalizeName(record.name),
+      email: normalizeEmail(record.email),
+      phone: formatPhone(record.phone),
+      birthdate: standardizeDate(record.birthdate),
+      city: capitalizeName(record.city)
+    })
     callback();
   }
 }
@@ -208,7 +215,35 @@ function standardizeDate(date) {
   // 2. Convert to YYYY-MM-DD format
   // 3. Validate date is real
   // 4. Return original if invalid
+  const temp1 = /^(\d{2})\/(\d{2})\/(\d{4})/;
+  const temp2 = /^(\d{4})-(\d{2})-(\d{2})/;
+  const temp3 = /^(\d{4})\/(\d{2})\/(\d{2})/;
+
+  let y, m, d;
+  if (temp1.test(date)) {
+    [, m, d, y] = date.match(temp1);
+  } else if (temp2.test(date)) {
+    [, y, m, d] = date.match(temp2);
+  } else if (temp3.test(date)) {
+    [, y, m, d] = date.match(temp3);
+  } else {
+    return date;
+  }
+
+  const validDate = new Date(Number(y), Number(m) - 1, Number(d));
+
+  if (validDate.getFullYear() === Number(y) &&
+      validDate.getMonth() === Number(m)-1 &&
+      validDate.getDate() === Number(d)
+    ) {
+      const year = y;
+      const month = String(m).padStart(2, '0');
+      const day = String(d).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+  
   return date;
+
 }
 
 /**
@@ -228,7 +263,21 @@ async function processCSVFile(inputPath, outputPath) {
 
   try {
     // Implementation goes here
-    console.log("CSV processing not implemented yet");
+    // console.log("CSV processing not implemented yet");
+    const readStream = fs.createReadStream(inputPath);
+
+    const parserStream = new CSVParser();
+    const transformStream = new DataTransformer();
+    const csvWriteStream = new CSVWriter();
+
+    const writeStream = fs.createWriteStream(outputPath);
+
+    return await pipeline(readStream, 
+             parserStream,
+             transformStream,
+             csvWriteStream,
+             writeStream
+    );
   } catch (error) {
     throw new Error(`Failed to process CSV file: ${error.message}`);
   }
@@ -241,6 +290,16 @@ function createSampleData() {
   // TODO: Create data directory and sample CSV file
   // 1. Create 'data' directory if it doesn't exist
   // 2. Write sample CSV data as specified in task description
+  const dataDir = "./data";
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir);
+  }
+  fs.writeFileSync(path.join(dataDir, 'users.csv'), `name,email,phone,birthdate,city
+john doe,JOHN.DOE@EXAMPLE.COM,1234567890,12/25/1990,new york
+jane smith,Jane.Smith@Gmail.Com,555-123-4567,1985-03-15,los angeles
+bob johnson,BOB@TEST.COM,invalid-phone,03/22/1992,chicago
+alice brown,alice.brown@company.org,9876543210,1988/07/04,houston
+`);
 }
 
 // Export classes and functions
@@ -257,7 +316,7 @@ module.exports = {
 };
 
 // Example usage (for testing):
-const isReadyToTest = false;
+const isReadyToTest = true;
 
 if (isReadyToTest) {
   // Create sample data
